@@ -38,6 +38,7 @@ latest_checkpoint.pth
 
 # Data files
 data/
+datasets/
 simplebooks_data/
 tokenized_dataset.pt
 *.zip
