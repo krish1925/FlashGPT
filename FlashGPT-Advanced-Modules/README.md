@@ -1,163 +1,186 @@
 # FlashGPT Advanced Modules
 
-This directory contains advanced training and inference scripts for the FlashGPT model, optimized for both CUDA and Apple Silicon (MPS) devices.
-
-## Features
-
-- Automatic device selection (CUDA/MPS/CPU)
-- Efficient training with gradient checkpointing
-- Automatic checkpointing every 120 seconds
-- Validation logging with model outputs
-- Dataset caching for faster training
-- Configurable model parameters
-- Interactive inference mode
+This directory contains the modular implementation of FlashGPT with advanced features and optimizations.
 
 ## Directory Structure
 
 ```
-FlashGPT-Advanced-Modules/
-├── checkpoints/          # Directory for model checkpoints
-├── datasets/            # Directory for cached datasets
-├── logs/               # Directory for training and validation logs
-├── train_flashgpt.py   # Training script
-├── infer_flashgpt.py   # Inference script
-└── README.md           # This file
+.
+├── modules/                    # Core modules
+│   ├── attention.py           # Attention mechanisms
+│   ├── config.py              # Configuration classes
+│   ├── datasets.py            # Dataset handling
+│   ├── embeddings.py          # Embedding implementations
+│   ├── models.py              # Model architectures
+│   ├── optimization.py        # Training optimizations
+│   ├── tools.py              # Utility tools
+│   ├── training.py           # Training loops
+│   └── utils.py              # Helper functions
+├── checkpoints/               # Model checkpoints
+├── datasets/                  # Training data
+├── logs/                      # Training logs
+├── cache/                     # Cached computations
+├── model_diagnostics.py       # Debugging utilities
+├── train_flashgpt.py         # Training script
+├── infer_flashgpt.py         # Inference script
+└── FlashGPT-Advanced-Thinking.py  # Advanced reasoning implementation
 ```
 
-## Installation
+## Module Descriptions
 
-1. Ensure you have the required dependencies:
+### Core Modules
+
+1. **attention.py** (11KB)
+   - Implementation of various attention mechanisms
+   - ALiBi positional bias
+   - Grouped Query Attention
+   - Flash Attention support
+   - Multi-head attention with optimizations
+
+2. **config.py** (1KB)
+   - Configuration classes
+   - Model hyperparameters
+   - Training settings
+   - Hardware-specific configs
+
+3. **datasets.py** (4KB)
+   - Dataset processing
+   - Data loading utilities
+   - Tokenization handling
+   - Batch preparation
+
+4. **embeddings.py** (3KB)
+   - Token embeddings
+   - Positional embeddings
+   - RoPE implementation
+   - Embedding dropout
+
+5. **models.py** (8KB)
+   - Model architecture definitions
+   - Transformer blocks
+   - Layer implementations
+   - Model initialization
+
+6. **optimization.py** (3KB)
+   - Training optimizations
+   - Learning rate scheduling
+   - Gradient handling
+   - Memory optimizations
+
+7. **tools.py** (6KB)
+   - Utility functions
+   - Calculator implementation
+   - Debugging tools
+   - Metrics calculation
+
+8. **training.py** (17KB)
+   - Training loop implementation
+   - Loss computation
+   - Gradient updates
+   - Checkpoint management
+
+9. **utils.py** (7KB)
+   - Helper functions
+   - Logging utilities
+   - Data processing
+   - Model utilities
+
+### Scripts
+
+1. **model_diagnostics.py** (13KB)
+   - Model debugging tools
+   - Performance profiling
+   - Memory usage tracking
+   - Training diagnostics
+
+2. **train_flashgpt.py** (9KB)
+   - Main training script
+   - Command-line interface
+   - Training configuration
+   - Experiment management
+
+3. **infer_flashgpt.py** (5KB)
+   - Inference utilities
+   - Text generation
+   - Model evaluation
+   - Batch inference
+
+4. **FlashGPT-Advanced-Thinking.py** (3KB)
+   - Advanced reasoning implementation
+   - Tree of Thought processing
+   - Multi-step reasoning
+   - Tool integration
+
+## Usage
+
+### Training
+
 ```bash
-pip install torch transformers datasets tqdm
-```
-
-2. For Apple Silicon users, ensure you have the latest PyTorch version with MPS support.
-
-## Training
-
-### Basic Usage
-
-```bash
-# Train with default settings (MPS on Apple Silicon)
-python train_flashgpt.py
-
-# Train with CUDA
-python train_flashgpt.py --cuda
-```
-
-### Advanced Options
-
-```bash
-# Customize training parameters
 python train_flashgpt.py \
-    --cuda \
-    --batch_size 8 \
-    --epochs 5 \
-    --learning_rate 2e-4 \
-    --max_seq_len 1024 \
-    --checkpoint_interval 300 \
-    --dataset "wikitext" \
-    --dataset_config "wikitext-2-raw-v1"
+    --config configs/default.yaml \
+    --output_dir checkpoints/run1 \
+    --batch_size 32 \
+    --learning_rate 3e-4
 ```
 
-### Arguments
-
-- `--checkpoint_dir`: Directory to save checkpoints (default: "checkpoints")
-- `--dataset`: Dataset to use for training (default: "wikitext")
-- `--dataset_config`: Dataset configuration (default: "wikitext-2-raw-v1")
-- `--cuda`: Use CUDA if available
-- `--max_seq_len`: Maximum sequence length (default: 512)
-- `--batch_size`: Training batch size (default: 4)
-- `--epochs`: Number of training epochs (default: 3)
-- `--learning_rate`: Learning rate (default: 1e-4)
-- `--checkpoint_interval`: Checkpoint interval in seconds (default: 120)
-
-## Inference
-
-### Basic Usage
+### Inference
 
 ```bash
-# Use latest checkpoint from checkpoints directory
-python infer_flashgpt.py --checkpoint checkpoints/
-
-# Use specific checkpoint
-python infer_flashgpt.py --checkpoint checkpoints/checkpoint-epoch1-step1000.pt
-```
-
-### Advanced Options
-
-```bash
-# Customize generation parameters
 python infer_flashgpt.py \
-    --checkpoint checkpoints/ \
-    --max_tokens 200 \
-    --temperature 0.8 \
-    --top_k 50 \
-    --top_p 0.95
+    --model_path checkpoints/run1/best_model.pt \
+    --prompt "Your prompt here" \
+    --max_length 100
 ```
 
-### Arguments
+### Diagnostics
 
-- `--checkpoint`: Path to model checkpoint or checkpoint directory
-- `--cuda`: Use CUDA if available
-- `--tokenizer`: Name or path to tokenizer (default: "gpt2")
-- `--max_tokens`: Maximum tokens to generate (default: 100)
-- `--temperature`: Generation temperature (default: 0.7)
-- `--top_k`: Top-k sampling parameter (default: 40)
-- `--top_p`: Top-p sampling parameter (default: 0.9)
-
-## Logging
-
-The training process generates several log files:
-
-1. `training.log`: Contains training progress and metrics
-2. `validation.log`: Contains validation prompts and model responses
-3. `dataset_cache.log`: Contains information about cached datasets
-
-Validation prompts are logged every 120 seconds during training, showing:
-- Input prompt
-- Model response
-- Generation parameters
-- Timestamp
-
-## Checkpoints
-
-Checkpoints are saved in the following format:
-```
-checkpoint-epoch{epoch}-step{step}.pt
+```bash
+python model_diagnostics.py \
+    --model_path checkpoints/run1/best_model.pt \
+    --test_batch_size 16 \
+    --profile_memory True
 ```
 
-Each checkpoint contains:
-- Model state dictionary
-- Model configuration
-- Optimizer state
-- Training progress (epoch and step)
-- Timestamp
+## Advanced Features
 
-## Dataset Caching
+1. **Attention Mechanisms**
+   - ALiBi positional bias
+   - Grouped Query Attention
+   - Flash Attention
+   - Sliding Window Attention
 
-Datasets are automatically cached in the `datasets/` directory to improve training performance. The cache includes:
-- Tokenized dataset
-- Dataset statistics
-- Processing metadata
+2. **Optimization Techniques**
+   - Mixed precision training
+   - Gradient checkpointing
+   - Memory-efficient attention
+   - Dynamic batch sizing
 
-## Troubleshooting
+3. **Advanced Reasoning**
+   - Tree of Thought processing
+   - Step-by-step reasoning
+   - Tool integration
+   - Self-verification
 
-1. **CUDA Out of Memory**
-   - Reduce batch size: `--batch_size 2`
-   - Reduce sequence length: `--max_seq_len 256`
-   - Enable gradient checkpointing (default: enabled)
+4. **Hardware Optimizations**
+   - CUDA optimizations
+   - MPS (Metal) support
+   - CPU fallback
+   - Multi-GPU training
 
-2. **MPS Performance Issues**
-   - Ensure you're using the latest PyTorch version
-   - Reduce batch size if experiencing memory issues
-   - Monitor system memory usage
+## Logging and Monitoring
 
-3. **Checkpoint Loading Issues**
-   - Ensure the checkpoint file exists
-   - Verify the model configuration matches
-   - Check device compatibility (CUDA/MPS)
+- Training logs in `logs/training.log`
+- Validation metrics in `logs/validation.log`
+- TensorBoard support
+- Model diagnostics
 
-## Contributing
+## Dependencies
 
-Feel free to submit issues and enhancement requests! 
+Required packages (versions to be specified in requirements.txt):
+- PyTorch
+- transformers
+- datasets
+- numpy
+- tqdm
+- pyyaml
+- tensorboard 
